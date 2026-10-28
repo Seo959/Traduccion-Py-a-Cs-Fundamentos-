@@ -1,0 +1,22 @@
+v0.2 - correccion de cierres inesperados
+
+Ejecutar: dotnet run
+
+ACTUALIZACIONES
+1. Nuevo metodo LeerEntero: repite la pregunta hasta recibir un numero valido.
+   Corrige el menu (letra en vez de numero) y la edad.
+   En Python la edad se validaba en clinica_service.py (_validar_datos_mascota):
+       if not edad.isdigit() or not (0 <= int(edad) <= 100): raise ValueError(...)
+2. Si no hay propietarios, no deja registrar mascotas.
+3. El numero de propietario solo se acepta si existe en la lista.
+4. La edad ahora se limita de 0 a 100 (igual que en Python).
+
+ERRORES SOLUCIONADOS (de v0.1): 1, 4 y 5
+
+ERRORES QUE SIGUEN (marcados en el codigo)
+1. Los datos no se guardan al salir
+2. El nombre del propietario puede quedar vacio (nuevo)
+3. El DNI no se valida
+4. Se puede repetir la misma mascota del mismo dueño (nuevo)
+   Python: registrar_mascota -> "Ese propietario ya tiene una mascota con ese nombre."
+5. El DNI se muestra completo
