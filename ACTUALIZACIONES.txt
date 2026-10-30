@@ -1,22 +1,24 @@
-v0.3 - validaciones y DNI protegido
+v0.4 - persistencia con JSON
 
 Ejecutar: dotnet run
+Se crea el archivo datos_clinica.json en la carpeta desde donde se ejecuta.
 
 ACTUALIZACIONES
-1. Nuevo metodo LeerTexto: no deja campos vacios (nombre, especie, DNI).
-2. Nuevo metodo DniValido: el DNI debe tener 8 numeros.
-   Python (clinica_service.py, validar_propietario):
-       if not dni.isdigit() or len(dni) != 8: raise ValueError("El DNI debe tener 8 números.")
-3. Nuevo metodo DniRepetido: no se registran dos propietarios con el mismo DNI.
-   Python: "Ya existe un propietario registrado con ese DNI."
-4. Nuevo metodo MascotaRepetida: un dueño no puede tener dos mascotas con el mismo nombre.
-   Python: "Ese propietario ya tiene una mascota con ese nombre."
-5. Propietario.ObtenerDniProtegido(): el DNI se muestra como ******78.
-   Python (models/entidades.py): "*" * (len(self.dni) - 2) + self.dni[-2:]
+1. GuardarDatos: convierte las listas a JSON y las escribe en el archivo.
+   Python (clinica_service.py): guardar_datos -> json.dump(datos, archivo, indent=4)
+2. CargarDatos: al iniciar lee el archivo y rearma las listas.
+   Python: cargar_datos / _cargar_desde_json
+3. Clase DatosClinica: agrupa propietarios y mascotas en un solo JSON.
+   Python: diccionario con las claves "propietarios", "mascotas", ...
+4. Las clases usan propiedades { get; set; } porque System.Text.Json no lee campos simples.
+5. La mascota guarda el DNI del dueño (DniDueno) y al cargar se vuelve a unir con su dueño.
+   Python usa propietario_id (P-0001), eso llegara en una version posterior.
+6. Ahora se pide el telefono del propietario (obligatorio como en Python).
 
-ERRORES SOLUCIONADOS (de v0.2): 2, 3, 4 y 5
+ERRORES SOLUCIONADOS (de v0.3): 1 y 2
 
 ERRORES QUE SIGUEN (marcados en el codigo)
-1. Los datos no se guardan al salir
-2. No se pide el telefono del propietario (nuevo)
-3. No se puede editar ni eliminar registros (nuevo)
+1. La ruta del JSON es relativa (depende de donde se ejecute) (nuevo)
+2. DNI y telefono se guardan sin proteger (nuevo)
+3. Si el JSON esta danado el programa se cierra (nuevo)
+4. No se puede editar ni eliminar registros
