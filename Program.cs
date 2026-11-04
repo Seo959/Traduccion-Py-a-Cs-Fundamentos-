@@ -1,4 +1,4 @@
-// v0.4 - los datos se guardan y cargan desde un archivo JSON
+// v0.5 - se puede editar y eliminar propietarios y mascotas
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -62,17 +62,25 @@ class Program
         while (opcion != 0)
         {
             Console.WriteLine();
-            Console.WriteLine("=== CLINICA DR. LEO v0.4 ===");
+            Console.WriteLine("=== CLINICA DR. LEO v0.5 ===");
             Console.WriteLine("1. Registrar propietario");
             Console.WriteLine("2. Registrar mascota");
             Console.WriteLine("3. Ver registros");
+            Console.WriteLine("4. Editar propietario");
+            Console.WriteLine("5. Editar mascota");
+            Console.WriteLine("6. Eliminar propietario");
+            Console.WriteLine("7. Eliminar mascota");
             Console.WriteLine("0. Salir");
 
-            opcion = LeerEntero("Elige una opcion: ", 0, 3);
+            opcion = LeerEntero("Elige una opcion: ", 0, 7);
 
             if (opcion == 1) RegistrarPropietario();
             else if (opcion == 2) RegistrarMascota();
             else if (opcion == 3) VerRegistros();
+            else if (opcion == 4) EditarPropietario();
+            else if (opcion == 5) EditarMascota();
+            else if (opcion == 6) EliminarPropietario();
+            else if (opcion == 7) EliminarMascota();
         }
 
         Console.WriteLine("Hasta luego");
@@ -109,9 +117,18 @@ class Program
             return;
         }
 
-        // ERROR 3: si el archivo esta danado o editado mal, aqui el programa se cierra
-        // (en Python se usa try/except y se continua con las listas vacias)
-        DatosClinica datos = JsonSerializer.Deserialize<DatosClinica>(File.ReadAllText(rutaDatos));
+        // si el archivo esta danado se avisa y se sigue con las listas vacias
+        // (igual que el try/except de _cargar_desde_json en Python)
+        DatosClinica datos;
+        try
+        {
+            datos = JsonSerializer.Deserialize<DatosClinica>(File.ReadAllText(rutaDatos));
+        }
+        catch (JsonException)
+        {
+            Console.WriteLine("No se pudo leer " + rutaDatos + ", se inicia sin datos");
+            return;
+        }
 
         propietarios = datos.Propietarios;
 
@@ -281,6 +298,131 @@ class Program
         Console.WriteLine("Mascota registrada");
     }
 
+    // muestra los dueños numerados y devuelve el elegido (-1 si no hay ninguno)
+    static int ElegirPropietario()
+    {
+        if (propietarios.Count == 0)
+        {
+            Console.WriteLine("No hay propietarios registrados");
+            return -1;
+        }
+
+        for (int i = 0; i < propietarios.Count; i++)
+        {
+            Console.WriteLine(i + ". " + propietarios[i].Nombre);
+        }
+
+        return LeerEntero("Numero del propietario: ", 0, propietarios.Count - 1);
+    }
+
+    // muestra las mascotas numeradas y devuelve la elegida (-1 si no hay ninguna)
+    static int ElegirMascota()
+    {
+        if (mascotas.Count == 0)
+        {
+            Console.WriteLine("No hay mascotas registradas");
+            return -1;
+        }
+
+        for (int i = 0; i < mascotas.Count; i++)
+        {
+            Console.WriteLine(i + ". " + mascotas[i].Nombre + " (" + mascotas[i].Dueno.Nombre + ")");
+        }
+
+        return LeerEntero("Numero de la mascota: ", 0, mascotas.Count - 1);
+    }
+
+    // vuelve a pedir los datos de un dueño ya registrado
+    // (equivale a actualizar_propietario de clinica_service.py)
+    static void EditarPropietario()
+    {
+        int indice = ElegirPropietario();
+        if (indice == -1) return;
+
+        Propietario p = propietarios[indice];
+
+        p.Nombre = LeerTexto("Nuevo nombre: ");
+
+        // ERROR 3: al editar solo se revisa que el DNI tenga 8 numeros, no se revisa si otro dueño ya lo tiene
+        // (en Python: "Ya existe otro propietario registrado con ese DNI.")
+        string dni = LeerTexto("Nuevo DNI (8 numeros): ");
+        while (!DniValido(dni))
+        {
+            Console.WriteLine("El DNI debe tener 8 numeros");
+            dni = LeerTexto("Nuevo DNI (8 numeros): ");
+        }
+        p.Dni = dni;
+
+        p.Telefono = LeerTexto("Nuevo telefono: ");
+
+        GuardarDatos();
+        Console.WriteLine("Propietario actualizado");
+    }
+
+    // vuelve a pedir los datos de una mascota ya registrada
+    // (equivale a actualizar_mascota de clinica_service.py)
+    static void EditarMascota()
+    {
+        int indice = ElegirMascota();
+        if (indice == -1) return;
+
+        Mascota m = mascotas[indice];
+
+        string nombre = LeerTexto("Nuevo nombre: ");
+
+        // el nombre nuevo no puede repetirse en otra mascota del mismo dueño
+        foreach (Mascota otra in mascotas)
+        {
+            if (otra != m && otra.Dueno == m.Dueno && otra.Nombre.ToLower() == nombre.ToLower())
+            {
+                Console.WriteLine("Ese propietario ya tiene una mascota con ese nombre");
+                return;
+            }
+        }
+
+        m.Nombre = nombre;
+        m.Especie = LeerTexto("Nueva especie: ");
+        m.Edad = LeerEntero("Nueva edad: ", 0, 100);
+
+        GuardarDatos();
+        Console.WriteLine("Mascota actualizada");
+    }
+
+    // elimina un dueño, solo si no tiene mascotas
+    // (en Python: "No se puede eliminar: el propietario todavía tiene mascotas vinculadas.")
+    static void EliminarPropietario()
+    {
+        int indice = ElegirPropietario();
+        if (indice == -1) return;
+
+        Propietario p = propietarios[indice];
+
+        foreach (Mascota m in mascotas)
+        {
+            if (m.Dueno == p)
+            {
+                Console.WriteLine("No se puede eliminar: el propietario todavia tiene mascotas");
+                return;
+            }
+        }
+
+        // ERROR 4: se elimina sin pedir confirmacion, un numero mal escrito borra el registro
+        propietarios.RemoveAt(indice);
+        GuardarDatos();
+        Console.WriteLine("Propietario eliminado");
+    }
+
+    // elimina una mascota de la lista (equivale a eliminar_mascota de clinica_service.py)
+    static void EliminarMascota()
+    {
+        int indice = ElegirMascota();
+        if (indice == -1) return;
+
+        mascotas.RemoveAt(indice);
+        GuardarDatos();
+        Console.WriteLine("Mascota eliminada");
+    }
+
     // muestra todo lo que hay en las listas
     static void VerRegistros()
     {
@@ -296,6 +438,6 @@ class Program
             Console.WriteLine(m.Nombre + " | " + m.Especie + " | " + m.Edad + " años | Dueño: " + m.Dueno.Nombre);
         }
 
-        // ERROR 4: no se puede editar ni eliminar nada, si te equivocas hay que borrar el JSON a mano
+        // ERROR 5: las listas no se pueden buscar ni ordenar, si hay muchos registros es dificil encontrar uno
     }
 }
