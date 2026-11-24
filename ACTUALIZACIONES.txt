@@ -1,27 +1,23 @@
-v0.5 - editar y eliminar
+v0.6 - busqueda, ordenamiento y confirmacion
 
 Ejecutar: dotnet run
 
 ACTUALIZACIONES
-1. Menu ampliado: 4 editar propietario, 5 editar mascota, 6 eliminar propietario, 7 eliminar mascota.
-2. ElegirPropietario y ElegirMascota: muestran la lista numerada y devuelven el indice elegido.
-3. EditarPropietario: vuelve a pedir nombre, DNI y telefono y guarda.
-   Python (clinica_service.py): actualizar_propietario
-4. EditarMascota: vuelve a pedir nombre, especie y edad; no deja repetir nombre del mismo dueño.
-   Python: actualizar_mascota
-5. EliminarPropietario: no permite borrar un dueño que todavia tiene mascotas.
-   Python: "No se puede eliminar: el propietario todavía tiene mascotas vinculadas."
-6. EliminarMascota: quita la mascota de la lista y guarda.
-   Python: eliminar_mascota (tambien borra sus citas y atenciones, eso llegara cuando existan)
-7. CargarDatos usa try/catch: si el JSON esta danado, avisa y sigue con listas vacias.
-   Python: try/except (OSError, json.JSONDecodeError) en _cargar_desde_json
+1. Opcion 8 Buscar: busca un texto en propietarios (nombre, DNI, telefono) y mascotas (nombre, especie, dueño).
+   Python (clinica_service.py): buscar_propietarios y buscar_mascotas
+2. Opcion 9 Ordenar mascotas con burbuja: nombre A-Z, Z-A, edad menor a mayor y mayor a menor.
+   Python (algoritmos_fundamentos.py): ordenar_pares_burbuja
+   Se corta antes si en una vuelta no hubo cambios (variable huboCambio / intercambio en Python).
+3. Confirmar: pregunta s/n antes de eliminar un propietario o una mascota.
+   Python (gui/app.py): messagebox.askyesno("Confirmar eliminación", ...)
+4. DniDeOtro: al editar un propietario no se puede usar el DNI de otro.
+   Python: "Ya existe otro propietario registrado con ese DNI."
 
-ERRORES SOLUCIONADOS (de v0.4): 3 (JSON danado) y 4 (editar y eliminar)
+ERRORES SOLUCIONADOS (de v0.5): 3, 4 y 5
 
 ERRORES QUE SIGUEN (marcados en el codigo)
 1. La ruta del JSON es relativa (viene de v0.4)
 2. DNI y telefono se guardan sin proteger (viene de v0.4)
-3. Al editar un dueño no se revisa si otro ya tiene ese DNI (nuevo)
-   Python: "Ya existe otro propietario registrado con ese DNI."
-4. Eliminar no pide confirmacion (nuevo)
-5. No hay busqueda ni ordenamiento de las listas (nuevo)
+3. El ordenamiento cambia la lista original (nuevo)
+   Python solo ordena una copia de la vista y conserva el indice real de cada mascota
+4. Todavia no existen citas, consultas ni pagos (nuevo)

@@ -1,4 +1,4 @@
-// v0.5 - se puede editar y eliminar propietarios y mascotas
+// v0.6 - busqueda, ordenamiento burbuja y confirmacion al eliminar
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -62,7 +62,7 @@ class Program
         while (opcion != 0)
         {
             Console.WriteLine();
-            Console.WriteLine("=== CLINICA DR. LEO v0.5 ===");
+            Console.WriteLine("=== CLINICA DR. LEO v0.6 ===");
             Console.WriteLine("1. Registrar propietario");
             Console.WriteLine("2. Registrar mascota");
             Console.WriteLine("3. Ver registros");
@@ -70,9 +70,11 @@ class Program
             Console.WriteLine("5. Editar mascota");
             Console.WriteLine("6. Eliminar propietario");
             Console.WriteLine("7. Eliminar mascota");
+            Console.WriteLine("8. Buscar");
+            Console.WriteLine("9. Ordenar mascotas");
             Console.WriteLine("0. Salir");
 
-            opcion = LeerEntero("Elige una opcion: ", 0, 7);
+            opcion = LeerEntero("Elige una opcion: ", 0, 9);
 
             if (opcion == 1) RegistrarPropietario();
             else if (opcion == 2) RegistrarMascota();
@@ -81,6 +83,8 @@ class Program
             else if (opcion == 5) EditarMascota();
             else if (opcion == 6) EliminarPropietario();
             else if (opcion == 7) EliminarMascota();
+            else if (opcion == 8) Buscar();
+            else if (opcion == 9) OrdenarMascotas();
         }
 
         Console.WriteLine("Hasta luego");
@@ -216,6 +220,20 @@ class Program
         return false;
     }
 
+    // busca si otro dueño (distinto al que se edita) ya tiene ese DNI
+    static bool DniDeOtro(string dni, Propietario actual)
+    {
+        foreach (Propietario p in propietarios)
+        {
+            if (p != actual && p.Dni == dni)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // pide los datos del dueño, valida, lo agrega a la lista y guarda el archivo
     static void RegistrarPropietario()
     {
@@ -343,15 +361,26 @@ class Program
 
         p.Nombre = LeerTexto("Nuevo nombre: ");
 
-        // ERROR 3: al editar solo se revisa que el DNI tenga 8 numeros, no se revisa si otro dueño ya lo tiene
+        // el DNI nuevo debe tener 8 numeros y no puede ser de otro dueño
         // (en Python: "Ya existe otro propietario registrado con ese DNI.")
-        string dni = LeerTexto("Nuevo DNI (8 numeros): ");
-        while (!DniValido(dni))
+        while (true)
         {
-            Console.WriteLine("El DNI debe tener 8 numeros");
-            dni = LeerTexto("Nuevo DNI (8 numeros): ");
+            string dni = LeerTexto("Nuevo DNI (8 numeros): ");
+
+            if (!DniValido(dni))
+            {
+                Console.WriteLine("El DNI debe tener 8 numeros");
+            }
+            else if (DniDeOtro(dni, p))
+            {
+                Console.WriteLine("Ya existe otro propietario con ese DNI");
+            }
+            else
+            {
+                p.Dni = dni;
+                break;
+            }
         }
-        p.Dni = dni;
 
         p.Telefono = LeerTexto("Nuevo telefono: ");
 
@@ -388,6 +417,21 @@ class Program
         Console.WriteLine("Mascota actualizada");
     }
 
+    // pregunta si o no antes de borrar (en Python esto lo hace la GUI con messagebox.askyesno)
+    static bool Confirmar(string mensaje)
+    {
+        while (true)
+        {
+            Console.Write(mensaje + "? (s/n): ");
+            string respuesta = Console.ReadLine().Trim().ToLower();
+
+            if (respuesta == "s") return true;
+            if (respuesta == "n") return false;
+
+            Console.WriteLine("Responde s o n");
+        }
+    }
+
     // elimina un dueño, solo si no tiene mascotas
     // (en Python: "No se puede eliminar: el propietario todavía tiene mascotas vinculadas.")
     static void EliminarPropietario()
@@ -406,7 +450,11 @@ class Program
             }
         }
 
-        // ERROR 4: se elimina sin pedir confirmacion, un numero mal escrito borra el registro
+        if (!Confirmar("Eliminar a " + p.Nombre))
+        {
+            return;
+        }
+
         propietarios.RemoveAt(indice);
         GuardarDatos();
         Console.WriteLine("Propietario eliminado");
@@ -418,9 +466,103 @@ class Program
         int indice = ElegirMascota();
         if (indice == -1) return;
 
+        if (!Confirmar("Eliminar a " + mascotas[indice].Nombre))
+        {
+            return;
+        }
+
         mascotas.RemoveAt(indice);
         GuardarDatos();
         Console.WriteLine("Mascota eliminada");
+    }
+
+    // busca un texto en mascotas (nombre, especie, dueño) y en propietarios (nombre, DNI, telefono)
+    // (equivale a buscar_mascotas y buscar_propietarios de clinica_service.py)
+    static void Buscar()
+    {
+        string termino = LeerTexto("Buscar: ").ToLower();
+        int encontrados = 0;
+
+        foreach (Propietario p in propietarios)
+        {
+            if (p.Nombre.ToLower().Contains(termino) || p.Dni.Contains(termino) || p.Telefono.Contains(termino))
+            {
+                Console.WriteLine("Propietario: " + p.Nombre + " | DNI: " + p.ObtenerDniProtegido());
+                encontrados++;
+            }
+        }
+
+        foreach (Mascota m in mascotas)
+        {
+            if (m.Nombre.ToLower().Contains(termino) || m.Especie.ToLower().Contains(termino)
+                || m.Dueno.Nombre.ToLower().Contains(termino))
+            {
+                Console.WriteLine("Mascota: " + m.Nombre + " | " + m.Especie + " | Dueño: " + m.Dueno.Nombre);
+                encontrados++;
+            }
+        }
+
+        if (encontrados == 0)
+        {
+            Console.WriteLine("No se encontraron resultados");
+        }
+    }
+
+    // ordena las mascotas con el metodo burbuja
+    // (idea de ordenar_pares_burbuja en algoritmos_fundamentos.py)
+    // criterios: 1 nombre A-Z, 2 nombre Z-A, 3 edad menor a mayor, 4 edad mayor a menor
+    static void OrdenarMascotas()
+    {
+        if (mascotas.Count == 0)
+        {
+            Console.WriteLine("No hay mascotas registradas");
+            return;
+        }
+
+        Console.WriteLine("1. Nombre A-Z");
+        Console.WriteLine("2. Nombre Z-A");
+        Console.WriteLine("3. Edad: menor a mayor");
+        Console.WriteLine("4. Edad: mayor a menor");
+        int criterio = LeerEntero("Criterio: ", 1, 4);
+
+        // ERROR 3: se ordena la lista original, cambia el orden de registro guardado
+        // (en Python solo se ordena una copia de la vista, la lista real no se toca)
+        int n = mascotas.Count;
+        for (int i = 0; i < n - 1; i++)
+        {
+            bool huboCambio = false;
+
+            for (int j = 0; j < n - i - 1; j++)
+            {
+                if (DebeIntercambiar(mascotas[j], mascotas[j + 1], criterio))
+                {
+                    Mascota temporal = mascotas[j];
+                    mascotas[j] = mascotas[j + 1];
+                    mascotas[j + 1] = temporal;
+                    huboCambio = true;
+                }
+            }
+
+            // si en una vuelta no hubo cambios, ya esta ordenado
+            if (!huboCambio)
+            {
+                break;
+            }
+        }
+
+        foreach (Mascota m in mascotas)
+        {
+            Console.WriteLine(m.Nombre + " | " + m.Especie + " | " + m.Edad + " años");
+        }
+    }
+
+    // dice si la mascota "a" debe ir despues de "b" segun el criterio elegido
+    static bool DebeIntercambiar(Mascota a, Mascota b, int criterio)
+    {
+        if (criterio == 1) return string.Compare(a.Nombre.ToLower(), b.Nombre.ToLower()) > 0;
+        if (criterio == 2) return string.Compare(a.Nombre.ToLower(), b.Nombre.ToLower()) < 0;
+        if (criterio == 3) return a.Edad > b.Edad;
+        return a.Edad < b.Edad;
     }
 
     // muestra todo lo que hay en las listas
@@ -438,6 +580,6 @@ class Program
             Console.WriteLine(m.Nombre + " | " + m.Especie + " | " + m.Edad + " años | Dueño: " + m.Dueno.Nombre);
         }
 
-        // ERROR 5: las listas no se pueden buscar ni ordenar, si hay muchos registros es dificil encontrar uno
+        // ERROR 4: todavia no existen citas, consultas ni pagos, solo propietarios y mascotas
     }
 }
