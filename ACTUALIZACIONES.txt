@@ -1,23 +1,28 @@
-v0.6 - busqueda, ordenamiento y confirmacion
+v0.7 - Reinicio: biblioteca en consola con archivos de texto
 
 Ejecutar: dotnet run
 
-ACTUALIZACIONES
-1. Opcion 8 Buscar: busca un texto en propietarios (nombre, DNI, telefono) y mascotas (nombre, especie, dueño).
-   Python (clinica_service.py): buscar_propietarios y buscar_mascotas
-2. Opcion 9 Ordenar mascotas con burbuja: nombre A-Z, Z-A, edad menor a mayor y mayor a menor.
-   Python (algoritmos_fundamentos.py): ordenar_pares_burbuja
-   Se corta antes si en una vuelta no hubo cambios (variable huboCambio / intercambio en Python).
-3. Confirmar: pregunta s/n antes de eliminar un propietario o una mascota.
-   Python (gui/app.py): messagebox.askyesno("Confirmar eliminación", ...)
-4. DniDeOtro: al editar un propietario no se puede usar el DNI de otro.
-   Python: "Ya existe otro propietario registrado con ese DNI."
+IDEA
+Se reinicia el proyecto desde la v0.7 con una estructura simple, parecida a la Practica Lab 4:
+Program.cs (menu) + carpeta Biblioteca con dos modulos. Sin JSON, sin clases de datos, sin cifrado.
+Los datos van en archivos .txt, una linea por registro, con campos separados por |
 
-ERRORES SOLUCIONADOS (de v0.5): 3, 4 y 5
+ESTRUCTURA
+  Program.cs                   menu y pantallas
+  Biblioteca/ModuloArchivo.cs  guardar y leer los .txt
+  Biblioteca/ModuloClinica.cs  validaciones, busquedas y reporte
 
-ERRORES QUE SIGUEN (marcados en el codigo)
-1. La ruta del JSON es relativa (viene de v0.4)
-2. DNI y telefono se guardan sin proteger (viene de v0.4)
-3. El ordenamiento cambia la lista original (nuevo)
-   Python solo ordena una copia de la vista y conserva el indice real de cada mascota
-4. Todavia no existen citas, consultas ni pagos (nuevo)
+FUNCIONES
+1. Registrar propietario (DNI de 8 numeros, no repetido)      -> propietarios.txt
+2. Registrar mascota (dueño existente, edad 0 a 100)          -> mascotas.txt
+3. Agendar cita (fecha, hora y turno libre)                   -> citas.txt
+4. Buscar por nombre, DNI o especie
+5. Ver reporte en pantalla
+6. Exportar el reporte a reporte.txt
+
+ERRORES QUE SE VAN A CORREGIR (marcados en el codigo)
+1. Los .txt se guardan con ruta relativa
+2. El DNI se muestra completo en el reporte
+3. TurnoOcupado compara texto y no fechas
+4. El telefono no se valida y el caracter | rompe el archivo
+5. No se puede cancelar, editar ni eliminar nada todavia
