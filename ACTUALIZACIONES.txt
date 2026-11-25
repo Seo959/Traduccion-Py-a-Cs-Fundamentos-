@@ -1,28 +1,26 @@
-v0.7 - Reinicio: biblioteca en consola con archivos de texto
+v0.8 - Codigos unicos automaticos para mascotas y citas
 
 Ejecutar: dotnet run
 
-IDEA
-Se reinicia el proyecto desde la v0.7 con una estructura simple, parecida a la Practica Lab 4:
-Program.cs (menu) + carpeta Biblioteca con dos modulos. Sin JSON, sin clases de datos, sin cifrado.
-Los datos van en archivos .txt, una linea por registro, con campos separados por |
+ACTUALIZACIONES
+1. ModuloClinica.GenerarCodigo: crea el siguiente codigo contando las lineas del archivo.
+   Mascotas: EXP-001, EXP-002...   Citas: CIT-2026-001, CIT-2026-002...
+   (el informe pide "generacion automatica de los codigos unicos")
+2. Al registrar una mascota o una cita se muestra su codigo.
+3. El codigo se guarda como ultimo campo de cada linea:
+   mascotas.txt: dni|nombre|especie|edad|codigo
+   citas.txt:    dni|mascota|fecha|hora|motivo|estado|codigo
+4. El reporte muestra el codigo al inicio de cada linea.
+5. Buscar tambien encuentra mascotas por codigo (ej: EXP-001).
 
-ESTRUCTURA
-  Program.cs                   menu y pantallas
-  Biblioteca/ModuloArchivo.cs  guardar y leer los .txt
-  Biblioteca/ModuloClinica.cs  validaciones, busquedas y reporte
+IMPORTANTE: borra los .txt creados con la v0.7, porque ahora las lineas llevan un campo mas.
 
-FUNCIONES
-1. Registrar propietario (DNI de 8 numeros, no repetido)      -> propietarios.txt
-2. Registrar mascota (dueño existente, edad 0 a 100)          -> mascotas.txt
-3. Agendar cita (fecha, hora y turno libre)                   -> citas.txt
-4. Buscar por nombre, DNI o especie
-5. Ver reporte en pantalla
-6. Exportar el reporte a reporte.txt
+ERRORES SOLUCIONADOS: ninguno (solo se agrego codigo nuevo)
 
-ERRORES QUE SE VAN A CORREGIR (marcados en el codigo)
+ERRORES QUE SIGUEN (marcados en el codigo)
 1. Los .txt se guardan con ruta relativa
 2. El DNI se muestra completo en el reporte
 3. TurnoOcupado compara texto y no fechas
 4. El telefono no se valida y el caracter | rompe el archivo
 5. No se puede cancelar, editar ni eliminar nada todavia
+6. El codigo se saca contando lineas, si se elimina un registro puede repetirse (nuevo)

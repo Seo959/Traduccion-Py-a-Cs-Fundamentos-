@@ -1,4 +1,4 @@
-// v0.7 - Reinicio: biblioteca en consola con archivos de texto
+// v0.8 - Codigos unicos automaticos para mascotas y citas
 
 using Biblioteca;
 
@@ -11,7 +11,7 @@ class Program
         while (opcion != 0)
         {
             Console.WriteLine();
-            Console.WriteLine("=== CLINICA DR. LEO v0.7 ===");
+            Console.WriteLine("=== CLINICA DR. LEO v0.8 ===");
             Console.WriteLine("1. Registrar propietario");
             Console.WriteLine("2. Registrar mascota");
             Console.WriteLine("3. Agendar cita");
@@ -101,8 +101,9 @@ class Program
             return;
         }
 
-        ModuloArchivo.Guardar(ModuloArchivo.Mascotas, dni + "|" + nombre + "|" + especie + "|" + edad);
-        Console.WriteLine("Mascota registrada");
+        string codigo = ModuloClinica.GenerarCodigo("EXP-", ModuloArchivo.Mascotas);
+        ModuloArchivo.Guardar(ModuloArchivo.Mascotas, dni + "|" + nombre + "|" + especie + "|" + edad + "|" + codigo);
+        Console.WriteLine("Mascota registrada con codigo " + codigo);
     }
 
     // esto agenda una cita para una mascota, valida fecha, hora y turno libre
@@ -135,11 +136,12 @@ class Program
         string motivo = LeerTexto("Motivo: ");
 
         // ERROR 5: la cita queda siempre Pendiente, todavia no se puede cancelar, editar ni eliminar nada
-        ModuloArchivo.Guardar(ModuloArchivo.Citas, dni + "|" + nombre + "|" + fecha + "|" + hora + "|" + motivo + "|Pendiente");
-        Console.WriteLine("Cita agendada");
+        string codigo = ModuloClinica.GenerarCodigo("CIT-" + DateTime.Now.Year + "-", ModuloArchivo.Citas);
+        ModuloArchivo.Guardar(ModuloArchivo.Citas, dni + "|" + nombre + "|" + fecha + "|" + hora + "|" + motivo + "|Pendiente|" + codigo);
+        Console.WriteLine("Cita agendada con codigo " + codigo);
     }
 
-    // esto busca un texto en propietarios (nombre, DNI) y mascotas (nombre, especie)
+    // esto busca un texto en propietarios (nombre, DNI) y mascotas (nombre, especie, codigo)
     static void Buscar()
     {
         string texto = LeerTexto("Buscar: ").ToLower();
@@ -156,9 +158,9 @@ class Program
 
         foreach (string[] m in ModuloArchivo.Leer(ModuloArchivo.Mascotas))
         {
-            if (m[1].ToLower().Contains(texto) || m[2].ToLower().Contains(texto))
+            if (m[1].ToLower().Contains(texto) || m[2].ToLower().Contains(texto) || m[4].ToLower().Contains(texto))
             {
-                Console.WriteLine("Mascota: " + m[1] + " | " + m[2] + " | DNI dueño: " + m[0]);
+                Console.WriteLine("Mascota: " + m[1] + " | " + m[2] + " | Codigo: " + m[4] + " | DNI dueño: " + m[0]);
                 encontrados++;
             }
         }

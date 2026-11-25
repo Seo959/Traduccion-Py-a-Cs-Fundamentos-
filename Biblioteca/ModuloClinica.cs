@@ -51,6 +51,13 @@ static class ModuloClinica
         return null;
     }
 
+    // esto crea el siguiente codigo contando las lineas del archivo, ej: EXP-001
+    public static string GenerarCodigo(string prefijo, string archivo)
+    {
+        // ERROR 6: si algun dia se elimina un registro, el codigo se puede repetir
+        return prefijo + (ModuloArchivo.Leer(archivo).Count + 1).ToString("000");
+    }
+
     // esto dice si ya hay una cita pendiente en ese dia y hora
     public static bool TurnoOcupado(string fecha, string hora)
     {
@@ -79,13 +86,13 @@ static class ModuloClinica
         lineas.Add("--- Mascotas ---");
         foreach (string[] m in ModuloArchivo.Leer(ModuloArchivo.Mascotas))
         {
-            lineas.Add(m[1] + " | " + m[2] + " | " + m[3] + " años | DNI dueño: " + m[0]);
+            lineas.Add(m[4] + " | " + m[1] + " | " + m[2] + " | " + m[3] + " años | DNI dueño: " + m[0]);
         }
 
         lineas.Add("--- Citas ---");
         foreach (string[] c in ModuloArchivo.Leer(ModuloArchivo.Citas))
         {
-            lineas.Add(c[2] + " " + c[3] + " | " + c[1] + " | " + c[4] + " | " + c[5]);
+            lineas.Add(c[6] + " | " + c[2] + " " + c[3] + " | " + c[1] + " | " + c[4] + " | " + c[5]);
         }
 
         return lineas;
