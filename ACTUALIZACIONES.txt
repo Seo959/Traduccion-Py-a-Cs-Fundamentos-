@@ -1,19 +1,18 @@
-v0.9 - Tipo de tramite, telefono validado y busqueda por DNI o telefono
+v0.10 - Biblioteca en modulos y ordenamiento burbuja
 
 Ejecutar: dotnet run
 
 ACTUALIZACIONES
-1. Tipo de tramite al agendar: 0 Cita, 1 Venta, 2 Cirugia, 3 Otro (lista Tipos en ModuloClinica).
-   Se guarda como ultimo campo de citas.txt y sale en el reporte.
-   (el informe pide "tipo de tramite (Cita; Venta; Cirugia; ETC)")
-2. TelefonoValido: el telefono debe tener 9 numeros.
-3. Buscar ahora tambien encuentra propietarios por telefono (ya buscaba por DNI).
-   (el informe pide "busqueda de expedientes usando el DNI o numero telefonico")
-4. LeerTexto ya no acepta el caracter |, asi no se rompe el archivo.
+1. La biblioteca se separa en modulos, uno por tarea (ver Biblioteca/README.txt):
+   ModuloArchivo, ModuloRegistro, ModuloBusqueda, ModuloOrdenamiento, ModuloReporte.
+   ModuloClinica desaparece: sus funciones pasaron a ModuloRegistro, ModuloBusqueda y ModuloReporte.
+   (el informe plantea modulos de Registros, Busquedas y Ordenamiento)
+2. ModuloOrdenamiento.Ordenar: metodo burbuja de menor a mayor, por codigo o por nombre.
+3. Opcion 5 "Ver reporte ordenado": las mascotas salen ordenadas segun el criterio elegido.
+   El reporte exportado (opcion 6) sale ordenado por codigo.
+4. Buscar ahora tambien muestra las citas y tramites (por DNI, nombre de mascota, codigo o tipo).
 
-IMPORTANTE: borra los .txt creados con la v0.8, porque las citas llevan un campo mas.
-
-ERRORES SOLUCIONADOS: 4
+ERRORES SOLUCIONADOS: 7
 
 ERRORES QUE SIGUEN (marcados en el codigo)
 1. Los .txt se guardan con ruta relativa
@@ -21,4 +20,4 @@ ERRORES QUE SIGUEN (marcados en el codigo)
 3. TurnoOcupado compara texto y no fechas
 5. No se puede cancelar, editar ni eliminar nada todavia
 6. El codigo se saca contando lineas, si se elimina un registro puede repetirse
-7. La busqueda no muestra las citas del cliente (nuevo)
+8. Si el criterio de orden es invalido, se ordena por codigo sin avisar (nuevo)

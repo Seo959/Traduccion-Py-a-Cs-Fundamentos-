@@ -1,4 +1,4 @@
-// v0.9 - Tipo de tramite, telefono validado y busqueda por DNI o telefono
+// v0.10 - Biblioteca en modulos y ordenamiento burbuja
 
 using Biblioteca;
 
@@ -11,12 +11,12 @@ class Program
         while (opcion != 0)
         {
             Console.WriteLine();
-            Console.WriteLine("=== CLINICA DR. LEO v0.9 ===");
+            Console.WriteLine("=== CLINICA DR. LEO v0.10 ===");
             Console.WriteLine("1. Registrar propietario");
             Console.WriteLine("2. Registrar mascota");
             Console.WriteLine("3. Agendar cita");
             Console.WriteLine("4. Buscar");
-            Console.WriteLine("5. Ver reporte");
+            Console.WriteLine("5. Ver reporte ordenado");
             Console.WriteLine("6. Exportar reporte a texto");
             Console.WriteLine("0. Salir");
 
@@ -59,13 +59,13 @@ class Program
     {
         string dni = LeerTexto("DNI (8 numeros): ");
 
-        if (!ModuloClinica.DniValido(dni))
+        if (!ModuloRegistro.DniValido(dni))
         {
             Console.WriteLine("El DNI debe tener 8 numeros");
             return;
         }
 
-        if (ModuloClinica.BuscarPropietario(dni) != null)
+        if (ModuloBusqueda.BuscarPropietario(dni) != null)
         {
             Console.WriteLine("Ya existe un propietario con ese DNI");
             return;
@@ -75,7 +75,7 @@ class Program
 
         string telefono = LeerTexto("Telefono (9 numeros): ");
 
-        if (!ModuloClinica.TelefonoValido(telefono))
+        if (!ModuloRegistro.TelefonoValido(telefono))
         {
             Console.WriteLine("El telefono debe tener 9 numeros");
             return;
@@ -90,7 +90,7 @@ class Program
     {
         string dni = LeerTexto("DNI del dueño: ");
 
-        if (ModuloClinica.BuscarPropietario(dni) == null)
+        if (ModuloBusqueda.BuscarPropietario(dni) == null)
         {
             Console.WriteLine("No existe un propietario con ese DNI");
             return;
@@ -98,7 +98,7 @@ class Program
 
         string nombre = LeerTexto("Nombre de la mascota: ");
 
-        if (ModuloClinica.BuscarMascota(dni, nombre) != null)
+        if (ModuloBusqueda.BuscarMascota(dni, nombre) != null)
         {
             Console.WriteLine("Ese dueño ya tiene una mascota con ese nombre");
             return;
@@ -106,13 +106,13 @@ class Program
 
         string especie = LeerTexto("Especie: ");
 
-        if (!ModuloClinica.EdadValida(LeerTexto("Edad (0 a 100): "), out int edad))
+        if (!ModuloRegistro.EdadValida(LeerTexto("Edad (0 a 100): "), out int edad))
         {
             Console.WriteLine("Edad invalida");
             return;
         }
 
-        string codigo = ModuloClinica.GenerarCodigo("EXP-", ModuloArchivo.Mascotas);
+        string codigo = ModuloRegistro.GenerarCodigo("EXP-", ModuloArchivo.Mascotas);
         ModuloArchivo.Guardar(ModuloArchivo.Mascotas, dni + "|" + nombre + "|" + especie + "|" + edad + "|" + codigo);
         Console.WriteLine("Mascota registrada con codigo " + codigo);
     }
@@ -123,7 +123,7 @@ class Program
         string dni = LeerTexto("DNI del dueño: ");
         string nombre = LeerTexto("Nombre de la mascota: ");
 
-        if (ModuloClinica.BuscarMascota(dni, nombre) == null)
+        if (ModuloBusqueda.BuscarMascota(dni, nombre) == null)
         {
             Console.WriteLine("No se encontro esa mascota");
             return;
@@ -132,13 +132,13 @@ class Program
         string fecha = LeerTexto("Fecha (DD/MM/AAAA): ");
         string hora = LeerTexto("Hora (HH:MM): ");
 
-        if (!ModuloClinica.FechaValida(fecha) || !ModuloClinica.HoraValida(hora))
+        if (!ModuloRegistro.FechaValida(fecha) || !ModuloRegistro.HoraValida(hora))
         {
             Console.WriteLine("Fecha u hora invalida");
             return;
         }
 
-        if (ModuloClinica.TurnoOcupado(fecha, hora))
+        if (ModuloRegistro.TurnoOcupado(fecha, hora))
         {
             Console.WriteLine("Ya existe una cita en ese dia y horario");
             return;
@@ -146,64 +146,56 @@ class Program
 
         string motivo = LeerTexto("Motivo: ");
 
-        for (int i = 0; i < ModuloClinica.Tipos.Length; i++)
+        for (int i = 0; i < ModuloRegistro.Tipos.Length; i++)
         {
-            Console.WriteLine(i + ". " + ModuloClinica.Tipos[i]);
+            Console.WriteLine(i + ". " + ModuloRegistro.Tipos[i]);
         }
 
-        if (!int.TryParse(LeerTexto("Tipo de tramite: "), out int numeroTipo) || numeroTipo < 0 || numeroTipo >= ModuloClinica.Tipos.Length)
+        if (!int.TryParse(LeerTexto("Tipo de tramite: "), out int numeroTipo) || numeroTipo < 0 || numeroTipo >= ModuloRegistro.Tipos.Length)
         {
             Console.WriteLine("Tipo invalido");
             return;
         }
 
         // ERROR 5: la cita queda siempre Pendiente, todavia no se puede cancelar, editar ni eliminar nada
-        string codigo = ModuloClinica.GenerarCodigo("CIT-" + DateTime.Now.Year + "-", ModuloArchivo.Citas);
-        ModuloArchivo.Guardar(ModuloArchivo.Citas, dni + "|" + nombre + "|" + fecha + "|" + hora + "|" + motivo + "|Pendiente|" + codigo + "|" + ModuloClinica.Tipos[numeroTipo]);
+        string codigo = ModuloRegistro.GenerarCodigo("CIT-" + DateTime.Now.Year + "-", ModuloArchivo.Citas);
+        ModuloArchivo.Guardar(ModuloArchivo.Citas, dni + "|" + nombre + "|" + fecha + "|" + hora + "|" + motivo + "|Pendiente|" + codigo + "|" + ModuloRegistro.Tipos[numeroTipo]);
         Console.WriteLine("Cita agendada con codigo " + codigo);
     }
 
-    // esto busca un texto en propietarios (nombre, DNI, telefono) y mascotas (nombre, especie, codigo)
-    // ERROR 7: la busqueda no muestra las citas del cliente, solo propietarios y mascotas
+    // esto busca un texto y muestra lo que encuentre en propietarios, mascotas y citas
     static void Buscar()
     {
-        string texto = LeerTexto("Buscar: ").ToLower();
-        int encontrados = 0;
+        List<string> encontrados = ModuloBusqueda.Buscar(LeerTexto("Buscar: "));
 
-        foreach (string[] p in ModuloArchivo.Leer(ModuloArchivo.Propietarios))
+        foreach (string linea in encontrados)
         {
-            if (p[0].Contains(texto) || p[1].ToLower().Contains(texto) || p[2].Contains(texto))
-            {
-                Console.WriteLine("Propietario: " + p[1] + " | DNI: " + p[0] + " | Telefono: " + p[2]);
-                encontrados++;
-            }
+            Console.WriteLine(linea);
         }
 
-        foreach (string[] m in ModuloArchivo.Leer(ModuloArchivo.Mascotas))
-        {
-            if (m[1].ToLower().Contains(texto) || m[2].ToLower().Contains(texto) || m[4].ToLower().Contains(texto))
-            {
-                Console.WriteLine("Mascota: " + m[1] + " | " + m[2] + " | Codigo: " + m[4] + " | DNI dueño: " + m[0]);
-                encontrados++;
-            }
-        }
-
-        if (encontrados == 0) Console.WriteLine("No se encontraron resultados");
+        if (encontrados.Count == 0) Console.WriteLine("No se encontraron resultados");
     }
 
-    // esto muestra el reporte en pantalla
+    // esto muestra el reporte en pantalla con las mascotas ordenadas
     static void VerReporte()
     {
-        foreach (string linea in ModuloClinica.GenerarReporte())
+        Console.WriteLine("1. Ordenar por codigo");
+        Console.WriteLine("2. Ordenar por nombre");
+
+        // ERROR 8: si se escribe otra cosa, se ordena por codigo sin avisar
+        int.TryParse(LeerTexto("Criterio: "), out int criterio);
+        int columna = criterio == 2 ? 1 : 4;
+
+        foreach (string linea in ModuloReporte.GenerarReporte(columna))
         {
             Console.WriteLine(linea);
         }
     }
 
-    // esto guarda el mismo reporte en reporte.txt
+    // esto guarda el mismo reporte en reporte.txt (mascotas ordenadas por codigo)
     static void ExportarReporte()
     {
-        File.WriteAllLines("reporte.txt", ModuloClinica.GenerarReporte());
+        File.WriteAllLines("reporte.txt", ModuloReporte.GenerarReporte(4));
         Console.WriteLine("Reporte guardado en reporte.txt");
     }
 }
