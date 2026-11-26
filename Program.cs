@@ -1,4 +1,4 @@
-// v0.8 - Codigos unicos automaticos para mascotas y citas
+// v0.9 - Tipo de tramite, telefono validado y busqueda por DNI o telefono
 
 using Biblioteca;
 
@@ -11,7 +11,7 @@ class Program
         while (opcion != 0)
         {
             Console.WriteLine();
-            Console.WriteLine("=== CLINICA DR. LEO v0.8 ===");
+            Console.WriteLine("=== CLINICA DR. LEO v0.9 ===");
             Console.WriteLine("1. Registrar propietario");
             Console.WriteLine("2. Registrar mascota");
             Console.WriteLine("3. Agendar cita");
@@ -34,7 +34,7 @@ class Program
         Console.WriteLine("Hasta luego");
     }
 
-    // esto pide un texto y no deja que quede vacio
+    // esto pide un texto, no deja que quede vacio ni que lleve el caracter |
     static string LeerTexto(string mensaje)
     {
         string texto = "";
@@ -43,6 +43,12 @@ class Program
         {
             Console.Write(mensaje);
             texto = (Console.ReadLine() ?? "").Trim();
+
+            if (texto.Contains('|'))
+            {
+                Console.WriteLine("No se puede usar el caracter |");
+                texto = "";
+            }
         }
 
         return texto;
@@ -67,8 +73,13 @@ class Program
 
         string nombre = LeerTexto("Nombre: ");
 
-        // ERROR 4: el telefono no se valida, y si alguien escribe "|" en un texto se rompe el archivo
-        string telefono = LeerTexto("Telefono: ");
+        string telefono = LeerTexto("Telefono (9 numeros): ");
+
+        if (!ModuloClinica.TelefonoValido(telefono))
+        {
+            Console.WriteLine("El telefono debe tener 9 numeros");
+            return;
+        }
 
         ModuloArchivo.Guardar(ModuloArchivo.Propietarios, dni + "|" + nombre + "|" + telefono);
         Console.WriteLine("Propietario registrado");
@@ -135,13 +146,25 @@ class Program
 
         string motivo = LeerTexto("Motivo: ");
 
+        for (int i = 0; i < ModuloClinica.Tipos.Length; i++)
+        {
+            Console.WriteLine(i + ". " + ModuloClinica.Tipos[i]);
+        }
+
+        if (!int.TryParse(LeerTexto("Tipo de tramite: "), out int numeroTipo) || numeroTipo < 0 || numeroTipo >= ModuloClinica.Tipos.Length)
+        {
+            Console.WriteLine("Tipo invalido");
+            return;
+        }
+
         // ERROR 5: la cita queda siempre Pendiente, todavia no se puede cancelar, editar ni eliminar nada
         string codigo = ModuloClinica.GenerarCodigo("CIT-" + DateTime.Now.Year + "-", ModuloArchivo.Citas);
-        ModuloArchivo.Guardar(ModuloArchivo.Citas, dni + "|" + nombre + "|" + fecha + "|" + hora + "|" + motivo + "|Pendiente|" + codigo);
+        ModuloArchivo.Guardar(ModuloArchivo.Citas, dni + "|" + nombre + "|" + fecha + "|" + hora + "|" + motivo + "|Pendiente|" + codigo + "|" + ModuloClinica.Tipos[numeroTipo]);
         Console.WriteLine("Cita agendada con codigo " + codigo);
     }
 
-    // esto busca un texto en propietarios (nombre, DNI) y mascotas (nombre, especie, codigo)
+    // esto busca un texto en propietarios (nombre, DNI, telefono) y mascotas (nombre, especie, codigo)
+    // ERROR 7: la busqueda no muestra las citas del cliente, solo propietarios y mascotas
     static void Buscar()
     {
         string texto = LeerTexto("Buscar: ").ToLower();
@@ -149,9 +172,9 @@ class Program
 
         foreach (string[] p in ModuloArchivo.Leer(ModuloArchivo.Propietarios))
         {
-            if (p[0].Contains(texto) || p[1].ToLower().Contains(texto))
+            if (p[0].Contains(texto) || p[1].ToLower().Contains(texto) || p[2].Contains(texto))
             {
-                Console.WriteLine("Propietario: " + p[1] + " | DNI: " + p[0]);
+                Console.WriteLine("Propietario: " + p[1] + " | DNI: " + p[0] + " | Telefono: " + p[2]);
                 encontrados++;
             }
         }

@@ -11,6 +11,15 @@ static class ModuloClinica
         return dni.Length == 8 && dni.All(char.IsDigit);
     }
 
+    // tipos de tramite que se pueden registrar
+    public static readonly string[] Tipos = { "Cita", "Venta", "Cirugia", "Otro" };
+
+    // esto revisa que el telefono tenga 9 numeros
+    public static bool TelefonoValido(string telefono)
+    {
+        return telefono.Length == 9 && telefono.All(char.IsDigit);
+    }
+
     // esto revisa que la edad sea un numero entre 0 y 100
     public static bool EdadValida(string texto, out int edad)
     {
@@ -92,7 +101,7 @@ static class ModuloClinica
         lineas.Add("--- Citas ---");
         foreach (string[] c in ModuloArchivo.Leer(ModuloArchivo.Citas))
         {
-            lineas.Add(c[6] + " | " + c[2] + " " + c[3] + " | " + c[1] + " | " + c[4] + " | " + c[5]);
+            lineas.Add(c[6] + " | " + c[7] + " | " + c[2] + " " + c[3] + " | " + c[1] + " | " + c[4] + " | " + c[5]);
         }
 
         return lineas;

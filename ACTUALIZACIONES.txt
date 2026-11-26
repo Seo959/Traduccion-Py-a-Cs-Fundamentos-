@@ -1,26 +1,24 @@
-v0.8 - Codigos unicos automaticos para mascotas y citas
+v0.9 - Tipo de tramite, telefono validado y busqueda por DNI o telefono
 
 Ejecutar: dotnet run
 
 ACTUALIZACIONES
-1. ModuloClinica.GenerarCodigo: crea el siguiente codigo contando las lineas del archivo.
-   Mascotas: EXP-001, EXP-002...   Citas: CIT-2026-001, CIT-2026-002...
-   (el informe pide "generacion automatica de los codigos unicos")
-2. Al registrar una mascota o una cita se muestra su codigo.
-3. El codigo se guarda como ultimo campo de cada linea:
-   mascotas.txt: dni|nombre|especie|edad|codigo
-   citas.txt:    dni|mascota|fecha|hora|motivo|estado|codigo
-4. El reporte muestra el codigo al inicio de cada linea.
-5. Buscar tambien encuentra mascotas por codigo (ej: EXP-001).
+1. Tipo de tramite al agendar: 0 Cita, 1 Venta, 2 Cirugia, 3 Otro (lista Tipos en ModuloClinica).
+   Se guarda como ultimo campo de citas.txt y sale en el reporte.
+   (el informe pide "tipo de tramite (Cita; Venta; Cirugia; ETC)")
+2. TelefonoValido: el telefono debe tener 9 numeros.
+3. Buscar ahora tambien encuentra propietarios por telefono (ya buscaba por DNI).
+   (el informe pide "busqueda de expedientes usando el DNI o numero telefonico")
+4. LeerTexto ya no acepta el caracter |, asi no se rompe el archivo.
 
-IMPORTANTE: borra los .txt creados con la v0.7, porque ahora las lineas llevan un campo mas.
+IMPORTANTE: borra los .txt creados con la v0.8, porque las citas llevan un campo mas.
 
-ERRORES SOLUCIONADOS: ninguno (solo se agrego codigo nuevo)
+ERRORES SOLUCIONADOS: 4
 
 ERRORES QUE SIGUEN (marcados en el codigo)
 1. Los .txt se guardan con ruta relativa
 2. El DNI se muestra completo en el reporte
 3. TurnoOcupado compara texto y no fechas
-4. El telefono no se valida y el caracter | rompe el archivo
 5. No se puede cancelar, editar ni eliminar nada todavia
-6. El codigo se saca contando lineas, si se elimina un registro puede repetirse (nuevo)
+6. El codigo se saca contando lineas, si se elimina un registro puede repetirse
+7. La busqueda no muestra las citas del cliente (nuevo)
