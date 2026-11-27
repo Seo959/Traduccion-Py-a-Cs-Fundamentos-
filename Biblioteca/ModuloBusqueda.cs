@@ -35,7 +35,7 @@ static class ModuloBusqueda
         {
             if (p[0].Contains(texto) || p[1].ToLower().Contains(texto) || p[2].Contains(texto))
             {
-                encontrados.Add("Propietario: " + p[1] + " | DNI: " + p[0] + " | Telefono: " + p[2]);
+                encontrados.Add("Propietario: " + p[1] + " | DNI: " + ModuloFormato.ProtegerDni(p[0]) + " | Telefono: " + p[2]);
             }
         }
 
@@ -43,7 +43,7 @@ static class ModuloBusqueda
         {
             if (m[1].ToLower().Contains(texto) || m[2].ToLower().Contains(texto) || m[4].ToLower().Contains(texto))
             {
-                encontrados.Add("Mascota: " + m[1] + " | " + m[2] + " | Codigo: " + m[4] + " | DNI dueño: " + m[0]);
+                encontrados.Add("Mascota: " + m[1] + " | " + m[2] + " | Codigo: " + m[4] + " | DNI dueño: " + ModuloFormato.ProtegerDni(m[0]));
             }
         }
 

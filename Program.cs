@@ -1,4 +1,4 @@
-// v0.10 - Biblioteca en modulos y ordenamiento burbuja
+// v0.11 - Exportar a CSV, carpeta de datos fija y DNI protegido
 
 using Biblioteca;
 
@@ -6,21 +6,22 @@ class Program
 {
     static void Main()
     {
+        Console.WriteLine("Los datos se guardan en: " + ModuloArchivo.Carpeta);
         int opcion = -1;
 
         while (opcion != 0)
         {
             Console.WriteLine();
-            Console.WriteLine("=== CLINICA DR. LEO v0.10 ===");
+            Console.WriteLine("=== CLINICA DR. LEO v0.11 ===");
             Console.WriteLine("1. Registrar propietario");
             Console.WriteLine("2. Registrar mascota");
             Console.WriteLine("3. Agendar cita");
             Console.WriteLine("4. Buscar");
             Console.WriteLine("5. Ver reporte ordenado");
-            Console.WriteLine("6. Exportar reporte a texto");
+            Console.WriteLine("6. Exportar reporte (txt y csv)");
             Console.WriteLine("0. Salir");
 
-            int.TryParse(LeerTexto("Elige una opcion: "), out opcion);
+            int.TryParse(ModuloConsola.LeerTexto("Elige una opcion: "), out opcion);
 
             if (opcion == 1) RegistrarPropietario();
             else if (opcion == 2) RegistrarMascota();
@@ -34,30 +35,10 @@ class Program
         Console.WriteLine("Hasta luego");
     }
 
-    // esto pide un texto, no deja que quede vacio ni que lleve el caracter |
-    static string LeerTexto(string mensaje)
-    {
-        string texto = "";
-
-        while (texto == "")
-        {
-            Console.Write(mensaje);
-            texto = (Console.ReadLine() ?? "").Trim();
-
-            if (texto.Contains('|'))
-            {
-                Console.WriteLine("No se puede usar el caracter |");
-                texto = "";
-            }
-        }
-
-        return texto;
-    }
-
     // esto pide los datos del dueño y lo guarda en propietarios.txt
     static void RegistrarPropietario()
     {
-        string dni = LeerTexto("DNI (8 numeros): ");
+        string dni = ModuloConsola.LeerTexto("DNI (8 numeros): ");
 
         if (!ModuloRegistro.DniValido(dni))
         {
@@ -71,9 +52,9 @@ class Program
             return;
         }
 
-        string nombre = LeerTexto("Nombre: ");
+        string nombre = ModuloConsola.LeerTexto("Nombre: ");
 
-        string telefono = LeerTexto("Telefono (9 numeros): ");
+        string telefono = ModuloConsola.LeerTexto("Telefono (9 numeros): ");
 
         if (!ModuloRegistro.TelefonoValido(telefono))
         {
@@ -88,7 +69,7 @@ class Program
     // esto registra una mascota de un dueño que ya existe
     static void RegistrarMascota()
     {
-        string dni = LeerTexto("DNI del dueño: ");
+        string dni = ModuloConsola.LeerTexto("DNI del dueño: ");
 
         if (ModuloBusqueda.BuscarPropietario(dni) == null)
         {
@@ -96,7 +77,7 @@ class Program
             return;
         }
 
-        string nombre = LeerTexto("Nombre de la mascota: ");
+        string nombre = ModuloConsola.LeerTexto("Nombre de la mascota: ");
 
         if (ModuloBusqueda.BuscarMascota(dni, nombre) != null)
         {
@@ -104,9 +85,9 @@ class Program
             return;
         }
 
-        string especie = LeerTexto("Especie: ");
+        string especie = ModuloConsola.LeerTexto("Especie: ");
 
-        if (!ModuloRegistro.EdadValida(LeerTexto("Edad (0 a 100): "), out int edad))
+        if (!ModuloRegistro.EdadValida(ModuloConsola.LeerTexto("Edad (0 a 100): "), out int edad))
         {
             Console.WriteLine("Edad invalida");
             return;
@@ -120,8 +101,8 @@ class Program
     // esto agenda una cita para una mascota, valida fecha, hora y turno libre
     static void AgendarCita()
     {
-        string dni = LeerTexto("DNI del dueño: ");
-        string nombre = LeerTexto("Nombre de la mascota: ");
+        string dni = ModuloConsola.LeerTexto("DNI del dueño: ");
+        string nombre = ModuloConsola.LeerTexto("Nombre de la mascota: ");
 
         if (ModuloBusqueda.BuscarMascota(dni, nombre) == null)
         {
@@ -129,8 +110,8 @@ class Program
             return;
         }
 
-        string fecha = LeerTexto("Fecha (DD/MM/AAAA): ");
-        string hora = LeerTexto("Hora (HH:MM): ");
+        string fecha = ModuloConsola.LeerTexto("Fecha (DD/MM/AAAA): ");
+        string hora = ModuloConsola.LeerTexto("Hora (HH:MM): ");
 
         if (!ModuloRegistro.FechaValida(fecha) || !ModuloRegistro.HoraValida(hora))
         {
@@ -144,14 +125,14 @@ class Program
             return;
         }
 
-        string motivo = LeerTexto("Motivo: ");
+        string motivo = ModuloConsola.LeerTexto("Motivo: ");
 
         for (int i = 0; i < ModuloRegistro.Tipos.Length; i++)
         {
             Console.WriteLine(i + ". " + ModuloRegistro.Tipos[i]);
         }
 
-        if (!int.TryParse(LeerTexto("Tipo de tramite: "), out int numeroTipo) || numeroTipo < 0 || numeroTipo >= ModuloRegistro.Tipos.Length)
+        if (!int.TryParse(ModuloConsola.LeerTexto("Tipo de tramite: "), out int numeroTipo) || numeroTipo < 0 || numeroTipo >= ModuloRegistro.Tipos.Length)
         {
             Console.WriteLine("Tipo invalido");
             return;
@@ -166,7 +147,7 @@ class Program
     // esto busca un texto y muestra lo que encuentre en propietarios, mascotas y citas
     static void Buscar()
     {
-        List<string> encontrados = ModuloBusqueda.Buscar(LeerTexto("Buscar: "));
+        List<string> encontrados = ModuloBusqueda.Buscar(ModuloConsola.LeerTexto("Buscar: "));
 
         foreach (string linea in encontrados)
         {
@@ -183,7 +164,7 @@ class Program
         Console.WriteLine("2. Ordenar por nombre");
 
         // ERROR 8: si se escribe otra cosa, se ordena por codigo sin avisar
-        int.TryParse(LeerTexto("Criterio: "), out int criterio);
+        int.TryParse(ModuloConsola.LeerTexto("Criterio: "), out int criterio);
         int columna = criterio == 2 ? 1 : 4;
 
         foreach (string linea in ModuloReporte.GenerarReporte(columna))
@@ -192,10 +173,10 @@ class Program
         }
     }
 
-    // esto guarda el mismo reporte en reporte.txt (mascotas ordenadas por codigo)
+    // esto guarda el reporte en txt y csv dentro de la carpeta datos
     static void ExportarReporte()
     {
-        File.WriteAllLines("reporte.txt", ModuloReporte.GenerarReporte(4));
-        Console.WriteLine("Reporte guardado en reporte.txt");
+        Console.WriteLine("Guardado en " + ModuloReporte.ExportarTexto(4));
+        Console.WriteLine("Guardado en " + ModuloReporte.ExportarCsv());
     }
 }

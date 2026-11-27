@@ -1,23 +1,26 @@
-v0.10 - Biblioteca en modulos y ordenamiento burbuja
+v0.11 - Exportar a CSV, carpeta de datos fija y DNI protegido
 
 Ejecutar: dotnet run
 
 ACTUALIZACIONES
-1. La biblioteca se separa en modulos, uno por tarea (ver Biblioteca/README.txt):
-   ModuloArchivo, ModuloRegistro, ModuloBusqueda, ModuloOrdenamiento, ModuloReporte.
-   ModuloClinica desaparece: sus funciones pasaron a ModuloRegistro, ModuloBusqueda y ModuloReporte.
-   (el informe plantea modulos de Registros, Busquedas y Ordenamiento)
-2. ModuloOrdenamiento.Ordenar: metodo burbuja de menor a mayor, por codigo o por nombre.
-3. Opcion 5 "Ver reporte ordenado": las mascotas salen ordenadas segun el criterio elegido.
-   El reporte exportado (opcion 6) sale ordenado por codigo.
-4. Buscar ahora tambien muestra las citas y tramites (por DNI, nombre de mascota, codigo o tipo).
+1. Carpeta fija "datos": los .txt ya no dependen de donde se ejecute el programa.
+   Esta junto al programa compilado (bin/Debug/net8.0/datos). Al iniciar se muestra la ruta.
+2. ModuloFormato.ProtegerDni: el DNI se ve como ******78 en reporte, busqueda y CSV.
+   Python (models/entidades.py): obtener_dni_protegido
+3. ModuloReporte.ExportarCsv: guarda datos/expedientes.csv (codigo, mascota, especie, edad,
+   propietario, dni, telefono). Se abre en Excel.
+   (el informe pide archivos .txt o .csv)
+4. La opcion 6 exporta reporte.txt y expedientes.csv, los dos dentro de la carpeta datos.
+5. ModuloConsola: LeerTexto sale de Program.cs a su propio modulo, Program queda mas corto.
+   Las funciones de exportar tambien pasan a ModuloReporte.
 
-ERRORES SOLUCIONADOS: 7
+IMPORTANTE: los .txt de la v0.10 quedaron en la carpeta anterior, no se usan. Empiezas con datos vacios.
+
+ERRORES SOLUCIONADOS: 1 y 2
 
 ERRORES QUE SIGUEN (marcados en el codigo)
-1. Los .txt se guardan con ruta relativa
-2. El DNI se muestra completo en el reporte
 3. TurnoOcupado compara texto y no fechas
 5. No se puede cancelar, editar ni eliminar nada todavia
 6. El codigo se saca contando lineas, si se elimina un registro puede repetirse
-8. Si el criterio de orden es invalido, se ordena por codigo sin avisar (nuevo)
+8. Si el criterio de orden es invalido, se ordena por codigo sin avisar
+9. Si un nombre lleva coma, las columnas del CSV se desordenan (nuevo)

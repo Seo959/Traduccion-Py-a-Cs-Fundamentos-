@@ -4,14 +4,17 @@ namespace Biblioteca;
 // cada registro es una linea y los campos van separados por |
 static class ModuloArchivo
 {
-    // ERROR 1: la ruta es relativa, los .txt se crean donde se ejecute el programa
-    public const string Propietarios = "propietarios.txt";
-    public const string Mascotas = "mascotas.txt";
-    public const string Citas = "citas.txt";
+    // los archivos siempre se guardan en la carpeta "datos" junto al programa
+    public static readonly string Carpeta = Path.Combine(AppContext.BaseDirectory, "datos");
 
-    // esto agrega una linea al final del archivo
+    public static readonly string Propietarios = Path.Combine(Carpeta, "propietarios.txt");
+    public static readonly string Mascotas = Path.Combine(Carpeta, "mascotas.txt");
+    public static readonly string Citas = Path.Combine(Carpeta, "citas.txt");
+
+    // esto agrega una linea al final del archivo (crea la carpeta si no existe)
     public static void Guardar(string archivo, string linea)
     {
+        Directory.CreateDirectory(Carpeta);
         File.AppendAllText(archivo, linea + "\n");
     }
 
