@@ -38,11 +38,30 @@ static class ModuloRegistro
         return DateTime.TryParseExact(hora, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out _);
     }
 
-    // esto crea el siguiente codigo contando las lineas del archivo, ej: EXP-001
-    public static string GenerarCodigo(string prefijo, string archivo)
+    // esto devuelve la fecha siempre como DD/MM/AAAA, ej: 5/3/2026 pasa a 05/03/2026
+    public static string NormalizarFecha(string fecha)
     {
-        // ERROR 6: si algun dia se elimina un registro, el codigo se puede repetir
-        return prefijo + (ModuloArchivo.Leer(archivo).Count + 1).ToString("000");
+        DateTime resultado = DateTime.ParseExact(fecha, "d/M/yyyy", CultureInfo.InvariantCulture);
+        return resultado.ToString("dd/MM/yyyy");
+    }
+
+    // esto crea el siguiente codigo: busca el numero mas alto que ya existe y le suma 1, ej: EXP-004
+    // "columna" es el lugar donde esta el codigo en cada linea del archivo
+    public static string GenerarCodigo(string prefijo, string archivo, int columna)
+    {
+        int mayor = 0;
+
+        foreach (string[] registro in ModuloArchivo.Leer(archivo))
+        {
+            string codigo = registro[columna];
+
+            if (int.TryParse(codigo.Substring(codigo.LastIndexOf('-') + 1), out int numero) && numero > mayor)
+            {
+                mayor = numero;
+            }
+        }
+
+        return prefijo + (mayor + 1).ToString("000");
     }
 
     // esto dice si ya hay una cita pendiente en ese dia y hora
@@ -50,8 +69,7 @@ static class ModuloRegistro
     {
         foreach (string[] c in ModuloArchivo.Leer(ModuloArchivo.Citas))
         {
-            // ERROR 3: se comparan textos, "5/11/2026" y "05/11/2026" cuentan como fechas distintas
-            if (c[2] == fecha && c[3] == hora && c[5] == "Pendiente") return true;
+            if (NormalizarFecha(c[2]) == NormalizarFecha(fecha) && c[3] == hora && c[5] == "Pendiente") return true;
         }
 
         return false;

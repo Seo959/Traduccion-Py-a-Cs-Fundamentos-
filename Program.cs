@@ -1,4 +1,4 @@
-// v0.11 - Exportar a CSV, carpeta de datos fija y DNI protegido
+// v0.12 - Cancelar citas, eliminar mascotas y fechas bien comparadas
 
 using Biblioteca;
 
@@ -12,13 +12,15 @@ class Program
         while (opcion != 0)
         {
             Console.WriteLine();
-            Console.WriteLine("=== CLINICA DR. LEO v0.11 ===");
+            Console.WriteLine("=== CLINICA DR. LEO v0.12 ===");
             Console.WriteLine("1. Registrar propietario");
             Console.WriteLine("2. Registrar mascota");
             Console.WriteLine("3. Agendar cita");
             Console.WriteLine("4. Buscar");
             Console.WriteLine("5. Ver reporte ordenado");
             Console.WriteLine("6. Exportar reporte (txt y csv)");
+            Console.WriteLine("7. Cancelar cita");
+            Console.WriteLine("8. Eliminar mascota");
             Console.WriteLine("0. Salir");
 
             int.TryParse(ModuloConsola.LeerTexto("Elige una opcion: "), out opcion);
@@ -29,6 +31,8 @@ class Program
             else if (opcion == 4) Buscar();
             else if (opcion == 5) VerReporte();
             else if (opcion == 6) ExportarReporte();
+            else if (opcion == 7) CancelarCita();
+            else if (opcion == 8) EliminarMascota();
             else if (opcion != 0) Console.WriteLine("Opcion no valida");
         }
 
@@ -93,7 +97,7 @@ class Program
             return;
         }
 
-        string codigo = ModuloRegistro.GenerarCodigo("EXP-", ModuloArchivo.Mascotas);
+        string codigo = ModuloRegistro.GenerarCodigo("EXP-", ModuloArchivo.Mascotas, 4);
         ModuloArchivo.Guardar(ModuloArchivo.Mascotas, dni + "|" + nombre + "|" + especie + "|" + edad + "|" + codigo);
         Console.WriteLine("Mascota registrada con codigo " + codigo);
     }
@@ -119,6 +123,8 @@ class Program
             return;
         }
 
+        fecha = ModuloRegistro.NormalizarFecha(fecha);
+
         if (ModuloRegistro.TurnoOcupado(fecha, hora))
         {
             Console.WriteLine("Ya existe una cita en ese dia y horario");
@@ -138,8 +144,7 @@ class Program
             return;
         }
 
-        // ERROR 5: la cita queda siempre Pendiente, todavia no se puede cancelar, editar ni eliminar nada
-        string codigo = ModuloRegistro.GenerarCodigo("CIT-" + DateTime.Now.Year + "-", ModuloArchivo.Citas);
+        string codigo = ModuloRegistro.GenerarCodigo("CIT-" + DateTime.Now.Year + "-", ModuloArchivo.Citas, 6);
         ModuloArchivo.Guardar(ModuloArchivo.Citas, dni + "|" + nombre + "|" + fecha + "|" + hora + "|" + motivo + "|Pendiente|" + codigo + "|" + ModuloRegistro.Tipos[numeroTipo]);
         Console.WriteLine("Cita agendada con codigo " + codigo);
     }
@@ -155,6 +160,23 @@ class Program
         }
 
         if (encontrados.Count == 0) Console.WriteLine("No se encontraron resultados");
+    }
+
+    // esto cancela una cita pidiendo su codigo
+    static void CancelarCita()
+    {
+        // ERROR 10: se cancela sin pedir confirmacion, un codigo mal escrito cancela la cita equivocada
+        Console.WriteLine(ModuloEdicion.CancelarCita(ModuloConsola.LeerTexto("Codigo de la cita: ")));
+    }
+
+    // esto elimina una mascota pidiendo el DNI del dueño y su nombre
+    static void EliminarMascota()
+    {
+        string dni = ModuloConsola.LeerTexto("DNI del dueño: ");
+        string nombre = ModuloConsola.LeerTexto("Nombre de la mascota: ");
+
+        // ERROR 10: tampoco pide confirmacion antes de eliminar
+        Console.WriteLine(ModuloEdicion.EliminarMascota(dni, nombre));
     }
 
     // esto muestra el reporte en pantalla con las mascotas ordenadas

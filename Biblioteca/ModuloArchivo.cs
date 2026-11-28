@@ -18,6 +18,19 @@ static class ModuloArchivo
         File.AppendAllText(archivo, linea + "\n");
     }
 
+    // esto escribe de nuevo todo el archivo con los registros que se le pasen
+    public static void Reescribir(string archivo, List<string[]> registros)
+    {
+        List<string> lineas = new List<string>();
+
+        foreach (string[] r in registros)
+        {
+            lineas.Add(string.Join("|", r));
+        }
+
+        File.WriteAllLines(archivo, lineas);
+    }
+
     // esto lee el archivo y devuelve cada linea separada en campos
     public static List<string[]> Leer(string archivo)
     {

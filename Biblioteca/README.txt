@@ -7,3 +7,4 @@ ModuloBusqueda      buscar propietarios, mascotas y citas
 ModuloOrdenamiento  ordenar registros (burbuja)
 ModuloFormato       como se muestran los datos (DNI protegido)
 ModuloReporte       armar y exportar el reporte (txt y csv)
+ModuloEdicion       cancelar citas y eliminar mascotas

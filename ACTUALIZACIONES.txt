@@ -1,26 +1,23 @@
-v0.11 - Exportar a CSV, carpeta de datos fija y DNI protegido
+v0.12 - Cancelar citas, eliminar mascotas y fechas bien comparadas
 
 Ejecutar: dotnet run
 
 ACTUALIZACIONES
-1. Carpeta fija "datos": los .txt ya no dependen de donde se ejecute el programa.
-   Esta junto al programa compilado (bin/Debug/net8.0/datos). Al iniciar se muestra la ruta.
-2. ModuloFormato.ProtegerDni: el DNI se ve como ******78 en reporte, busqueda y CSV.
-   Python (models/entidades.py): obtener_dni_protegido
-3. ModuloReporte.ExportarCsv: guarda datos/expedientes.csv (codigo, mascota, especie, edad,
-   propietario, dni, telefono). Se abre en Excel.
-   (el informe pide archivos .txt o .csv)
-4. La opcion 6 exporta reporte.txt y expedientes.csv, los dos dentro de la carpeta datos.
-5. ModuloConsola: LeerTexto sale de Program.cs a su propio modulo, Program queda mas corto.
-   Las funciones de exportar tambien pasan a ModuloReporte.
+1. NormalizarFecha: la fecha se guarda y se compara siempre como DD/MM/AAAA.
+   "5/3/2026" y "05/03/2026" ya cuentan como el mismo dia en TurnoOcupado.
+   Python: normalizar_fecha
+2. Opcion 7 Cancelar cita: se escribe el codigo (CIT-2026-001) y la cita pasa a Cancelada.
+   Una cita cancelada ya no ocupa el turno.
+3. Opcion 8 Eliminar mascota: se escribe DNI del dueño y nombre. No se elimina si tiene citas.
+   Python: eliminar_mascota
+4. ModuloEdicion: modulo nuevo con CancelarCita y EliminarMascota.
+   ModuloArchivo.Reescribir: vuelve a escribir un archivo completo despues de un cambio.
+5. GenerarCodigo ahora busca el numero mas alto que existe y suma 1, ya no cuenta lineas.
+   Si hay EXP-001 y EXP-003, el siguiente es EXP-004 (no repite EXP-003).
 
-IMPORTANTE: los .txt de la v0.10 quedaron en la carpeta anterior, no se usan. Empiezas con datos vacios.
-
-ERRORES SOLUCIONADOS: 1 y 2
+ERRORES SOLUCIONADOS: 3, 5 y 6
 
 ERRORES QUE SIGUEN (marcados en el codigo)
-3. TurnoOcupado compara texto y no fechas
-5. No se puede cancelar, editar ni eliminar nada todavia
-6. El codigo se saca contando lineas, si se elimina un registro puede repetirse
 8. Si el criterio de orden es invalido, se ordena por codigo sin avisar
-9. Si un nombre lleva coma, las columnas del CSV se desordenan (nuevo)
+9. Si un nombre lleva coma, las columnas del CSV se desordenan
+10. Cancelar y eliminar no piden confirmacion (nuevo)
